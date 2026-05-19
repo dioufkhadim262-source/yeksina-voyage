@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YEKSINA VOYAGE</title>
+
+<style>
+
+/* =========================
+   🌈 FOND GLOBAL
+========================= */
+body{
+  margin:0;
+  font-family:Arial;
+  background: linear-gradient(135deg,#ff9800,#ffffff,#0d47a1);
+}
+
+/* =========================
+   HEADER
+========================= */
+.header{
+  text-align:center;
+  padding:50px;
+  font-size:45px;
+  font-weight:bold;
+  color:#0d47a1;
+}
+
+/* =========================
+   GRID 3 TRAJETS
+========================= */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;
+  padding:20px;
+}
+
+/* CARD */
+.card{
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* TRAJET CENTRAL */
+.card.center{
+  transform:scale(1.08);
+  border:3px solid #0d47a1;
+}
+
+/* TITRES */
+h3{
+  color:#0d47a1;
+}
+
+/* PRIX */
+.price{
+  color:#ff9800;
+  font-weight:bold;
+}
+
+/* INPUTS */
+input,select{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:15px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:15px;
+  background:#0d47a1;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#ff9800;
+  color:black;
+}
+
+/* =========================
+   🎫 TICKET PREMIUM
+========================= */
+.ticket{
+  margin-top:15px;
+  padding:20px;
+  border-radius:30px;
+
+  background: linear-gradient(135deg,#ffffff,#e3f2fd,#bbdefb);
+
+  box-shadow:
+    0 25px 50px rgba(0,0,0,0.3),
+    inset 0 5px 15px rgba(255,255,255,0.9);
+
+  position:relative;
+  overflow:hidden;
+  animation: pop 0.4s ease;
+}
+
+/* lumière animée */
+.ticket::before{
+  content:"";
+  position:absolute;
+  top:-50%;
+  left:-50%;
+  width:200%;
+  height:200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.7), transparent 60%);
+  animation: shine 2.5s linear infinite;
+}
+
+@keyframes shine{
+  0%{transform:translateX(-60%) rotate(25deg);}
+  100%{transform:translateX(60%) rotate(25deg);}
+}
+
+@keyframes pop{
+  from{opacity:0; transform:scale(0.8);}
+  to{opacity:1; transform:scale(1);}
+}
+
+/* RÉCAP */
+.emboss{
+  font-weight:bold;
+  font-size:16px;
+  letter-spacing:2px;
+  text-align:center;
+  color:#0d47a1;
+  text-shadow:
+    1px 1px 0 #fff,
+    2px 2px 0 #ccc,
+    3px 3px 10px rgba(0,0,0,0.2);
+}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  padding:25px;
+  font-size:14px;
+  font-weight:bold;
+  color:#0d47a1;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  YEKSINA VOYAGE 
+</div>
+
+<div class="grid">
+
+  <!-- DAKAR -->
+  <div class="card">
+    <h3>UGB → DAKAR 4:45</h3>
+    <div class="price">4000 FCFA</div>
+
+    <input id="nom1" placeholder="Nom complet">
+    <input id="tel1" placeholder="Téléphone">
+
+    <select id="place1">
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+    </select>
+
+    <button onclick="reserver('Dakar',1)">Réserver</button>
+    <div id="res1"></div>
+  </div>
+
+  <!-- TOUBA (CENTRE) -->
+  <div class="card center">
+    <h3>UGB → TOUBA 4:45</h3>
+    <div class="price">5000 FCFA ⭐ POPULAIRE</div>
+
+    <input id="nom2" placeholder="Nom complet">
+    <input id="tel2" placeholder="Téléphone">
+
+    <select id="place2">
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+    </select>
+
+    <button onclick="reserver('Touba',2)">Réserver</button>
+    <div id="res2"></div>
+  </div>
+
+  <!-- KAOLACK -->
+  <div class="card">
+    <h3>UGB → KAOLACK 4:45</h3>
+    <div class="price">6000 FCFA</div>
+
+    <input id="nom3" placeholder="Nom complet">
+    <input id="tel3" placeholder="Téléphone">
+
+    <select id="place3">
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+    </select>
+
+    <button onclick="reserver('Kaolack',3)">Réserver</button>
+    <div id="res3"></div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  © 2026 YEKSINA VOYAGE — Tous droits réservés<br>
+  📞 WhatsApp : +221 78 612 76 44 | +221 78 821 31 67
+</div>
+
+<script>
+
+/* VALIDATION */
+function isNom(v){
+  return /^[a-zA-ZÀ-ÿ\s]+$/.test(v);
+}
+
+function isTel(v){
+  return /^[0-9]+$/.test(v);
+
+/* RESERVATION */
+async function reserver(trajet,id){
+
+  let nom = document.getElementById("nom"+id).value;
+  let tel = document.getElementById("tel"+id).value;
+  let places = document.getElementById("place"+id).value;
+
+  if(!isNom(nom)){
+    alert("❌ Nom invalide (lettres uniquement)");
+    return;
+  }
+
+  if(!isTel(tel)){
+    alert("❌ Téléphone invalide (chiffres uniquement)");
+    return;
+  }
+
+  let res = await fetch("/reserver",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({nom,telephone:tel,trajet,places})
+  });
+
+  let data = await res.json();
+
+  if(!data.success){
+    alert(data.message);
+    return;
+  }
+
+  let prix = 5000 * parseInt(places);
+
+  /* 🎫 RÉCAPITULATIF AVANT PAIEMENT */
+  document.getElementById("res"+id).innerHTML = `
+    <div class="ticket">
+
+      <div class="emboss">RÉCAPITULATIF</div><br>
+
+      👤 Nom: ${nom}<br>
+      🚌 Trajet: ${trajet}<br>
+      🎟️ Places: ${places}<br>
+      💰 Total: ${prix} FCFA<br><br>
+
+      <button onclick="window.open('${data.paymentUrl}','_blank')">
+        CONFIRMER & PAYER
+      </button>
+
+    </div>
+  `;
+}
+
+</script>
+
+</body>
+</html>
