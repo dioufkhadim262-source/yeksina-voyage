@@ -17,17 +17,17 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 /* ─────────────────────────────────────────
-   MONGODB CONNECTION
+   MONGODB
 ───────────────────────────────────────── */
 const MONGO_URI = process.env.MONGO_URI ||
   "mongodb+srv://loufadesign_db_user:qXjO4DkOh2Za7wLE@cluster0.xfxqvtg.mongodb.net/yeksina";
 
 mongoose.connect(MONGO_URI)
-  .then(() => console.log("✅  MongoDB connecté"))
-  .catch(err => console.error("❌  MongoDB :", err.message));
+  .then(() => console.log("✅ MongoDB connecté"))
+  .catch(err => console.error("❌ MongoDB :", err.message));
 
 /* ─────────────────────────────────────────
-   PLACES DISPONIBLES
+   PLACES + DATES
 ───────────────────────────────────────── */
 let placesDisponibles = {
   Dakar:   14,
@@ -35,18 +35,20 @@ let placesDisponibles = {
   Kaolack: 14,
 };
 
+const datesDisponibles = ["2026-05-22", "2026-05-23", "2026-05-24"];
+
 /* ─────────────────────────────────────────
-   MONGOOSE MODEL
+   MODEL
 ───────────────────────────────────────── */
 const reservationSchema = new mongoose.Schema({
   nom:        { type: String, required: true },
   telephone:  { type: String, required: true },
   trajet:     { type: String, required: true, enum: ["Dakar","Touba","Kaolack"] },
-  places:     { type: Number, required: true, min: 1 },
+  places:     { type: Number, required: true },
+  dateVoyage: { type: String, required: true }, // ✔️ AJOUT
   siege:      { type: String },
   prix:       { type: Number, required: true },
-  statut:     { type: String, default: "EN_ATTENTE_PAIEMENT",
-                enum: ["EN_ATTENTE_PAIEMENT","PAYE","ANNULE"] },
+  statut:     { type: String, default: "EN_ATTENTE_PAIEMENT" },
   codeTicket: { type: String, unique: true },
   qrCode:     { type: String },
   pdf:        { type: String },
@@ -59,68 +61,60 @@ const Reservation = mongoose.model("Reservation", reservationSchema);
    HELPERS
 ───────────────────────────────────────── */
 
-/** Nettoyage numéro téléphone (IMPORTANT FIX MOBILE) */
-function normalizeTel(v) {
-  return String(v).replace(/\D/g, ""); // enlève +, espaces, etc.
+function normalizeTel(v){
+  return String(v).replace(/\D/g,"");
 }
 
-/** Validation nom */
-function isNom(v) {
+function isTel(v){
+  const clean = normalizeTel(v);
+  return clean.length >= 9 && clean.length <= 15;
+}
+
+function isNom(v){
   return typeof v === "string" &&
     /^[a-zA-ZÀ-ÿ\s\-']+$/.test(v.trim()) &&
     v.trim().length >= 2;
 }
 
-/** FIX : téléphone compatible mobile +221 etc */
-function isTel(v) {
-  const clean = normalizeTel(v);
-  return clean.length >= 7 && clean.length <= 15;
-}
-
-/** Siège */
-function genererSiege(restantes) {
-  const lettres = ["A", "B", "C", "D"];
-  return lettres[Math.floor(Math.random() * lettres.length)] + restantes;
-}
-
-/** 💰 FIX PRIX KAOLACK */
-function getPrix(trajet) {
-  const tarifs = {
+/* ✔️ PRIX FIX KAOLACK */
+function getPrix(trajet){
+  return {
     Dakar: 4000,
     Touba: 5000,
-    Kaolack: 6500   // ✅ CORRIGÉ
-  };
-  return tarifs[trajet] || 5000;
+    Kaolack: 6500
+  }[trajet] || 5000;
 }
 
-function genererCodeTicket() {
+function genererSiege(restantes){
+  const lettres = ["A","B","C","D"];
+  return lettres[Math.floor(Math.random()*lettres.length)] + restantes;
+}
+
+function genererCodeTicket(){
   return "YKS-" + crypto.randomBytes(4).toString("hex").toUpperCase();
 }
 
 /* ─────────────────────────────────────────
    PDF
 ───────────────────────────────────────── */
-const PDF_DIR = path.join(__dirname, "pdfs");
-if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR);
+const PDF_DIR = path.join(__dirname,"pdfs");
+if(!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR);
 
-async function genererPDF(reservation) {
+async function genererPDF(reservation){
   const { codeTicket, nom, telephone, trajet, places, siege, prix } = reservation;
-  const pdfName = codeTicket + ".pdf";
-  const pdfPath = path.join(PDF_DIR, pdfName);
 
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A5", margins: 50 });
+  const pdfPath = path.join(PDF_DIR, codeTicket+".pdf");
+
+  return new Promise((resolve,reject)=>{
+    const doc = new PDFDocument({ size:"A5", margins:50 });
     const stream = fs.createWriteStream(pdfPath);
 
     doc.pipe(stream);
 
-    doc.fontSize(22).font("Helvetica-Bold")
-      .text("YEKSINA VOYAGE", { align: "center" });
-
+    doc.fontSize(20).text("YEKSINA VOYAGE",{align:"center"});
     doc.moveDown();
-    doc.fontSize(12)
-      .text(`Ticket : ${codeTicket}`, { align: "center" });
 
+    doc.fontSize(12).text(`Ticket: ${codeTicket}`);
     doc.moveDown();
 
     const details = [
@@ -132,12 +126,13 @@ async function genererPDF(reservation) {
       ["Prix", `${prix * places} FCFA`],
     ];
 
-    details.forEach(([a,b]) => {
+    details.forEach(([a,b])=>{
       doc.text(`${a} : ${b}`);
     });
 
     doc.end();
-    stream.on("finish", () => resolve(pdfName));
+
+    stream.on("finish", ()=>resolve(codeTicket+".pdf"));
     stream.on("error", reject);
   });
 }
@@ -146,30 +141,35 @@ async function genererPDF(reservation) {
    ROUTES
 ───────────────────────────────────────── */
 
-app.get("/places", (req, res) => {
+app.get("/places",(req,res)=>{
   res.json(placesDisponibles);
 });
 
-app.post("/reserver", async (req, res) => {
-  try {
-    let { nom, telephone, trajet, places } = req.body;
+/* ✔️ RESERVATION FINAL */
+app.post("/reserver", async (req,res)=>{
+  try{
+    let { nom, telephone, trajet, places, date } = req.body;
 
-    if (!nom || !telephone || !trajet || !places) {
-      return res.json({ success: false, message: "Champs manquants" });
+    if(!nom || !telephone || !trajet || !places || !date){
+      return res.json({success:false,message:"Champs manquants"});
     }
 
-    if (!isNom(nom)) {
-      return res.json({ success: false, message: "Nom invalide" });
+    if(!datesDisponibles.includes(date)){
+      return res.json({success:false,message:"Date invalide"});
     }
 
-    if (!isTel(telephone)) {
-      return res.json({ success: false, message: "Numéro invalide" });
+    if(!isNom(nom)){
+      return res.json({success:false,message:"Nom invalide"});
+    }
+
+    if(!isTel(telephone)){
+      return res.json({success:false,message:"Téléphone invalide"});
     }
 
     const nbPlaces = parseInt(places);
 
-    if (nbPlaces > placesDisponibles[trajet]) {
-      return res.json({ success: false, message: "Pas assez de places" });
+    if(nbPlaces > placesDisponibles[trajet]){
+      return res.json({success:false,message:"Pas assez de places"});
     }
 
     placesDisponibles[trajet] -= nbPlaces;
@@ -180,9 +180,10 @@ app.post("/reserver", async (req, res) => {
 
     const reservation = new Reservation({
       nom: nom.trim(),
-      telephone: normalizeTel(telephone), // ✅ FIX IMPORTANT
+      telephone: normalizeTel(telephone),
       trajet,
       places: nbPlaces,
+      dateVoyage: date,
       siege,
       prix,
       codeTicket
@@ -190,11 +191,21 @@ app.post("/reserver", async (req, res) => {
 
     await reservation.save();
 
+    genererPDF({
+      codeTicket,
+      nom,
+      telephone,
+      trajet,
+      places: nbPlaces,
+      siege,
+      prix
+    }).then(pdf => reservation.pdf = pdf);
+
     const paymentUrl =
       `https://pay.wave.com/m/M_sn_O2mWfULdH641/c/sn/?amount=${prix * nbPlaces}`;
 
     return res.json({
-      success: true,
+      success:true,
       ticketCode: codeTicket,
       prix,
       siege,
@@ -202,9 +213,9 @@ app.post("/reserver", async (req, res) => {
       paymentUrl
     });
 
-  } catch (err) {
+  }catch(err){
     console.error(err);
-    return res.json({ success: false, message: "Erreur serveur" });
+    return res.json({success:false,message:"Erreur serveur"});
   }
 });
 
@@ -212,6 +223,6 @@ app.post("/reserver", async (req, res) => {
    START
 ───────────────────────────────────────── */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, ()=>{
   console.log("🚀 Serveur OK :", PORT);
 });
