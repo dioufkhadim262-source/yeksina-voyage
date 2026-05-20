@@ -15,90 +15,224 @@
   --bg:#F5F3EE;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
 body{
   font-family:'DM Sans',sans-serif;
   background:var(--bg);
 }
 
+/* HERO */
 .hero{
-  background:var(--navy);
+  background:linear-gradient(135deg,#2581c4,#1a5d91);
   color:white;
-  padding:70px 20px;
+  padding:80px 20px;
   text-align:center;
+  box-shadow:0 8px 30px rgba(0,0,0,0.15);
 }
 
 .hero h1{
   font-family:'Syne',sans-serif;
   font-size:60px;
+  letter-spacing:2px;
 }
 
-.hero span{color:var(--orange);}
+.hero span{
+  color:var(--orange);
+}
 
-.container{max-width:1100px;margin:auto;padding:40px 20px;}
+.hero p{
+  margin-top:15px;
+  font-size:18px;
+  opacity:0.95;
+}
 
+.container{
+  max-width:1150px;
+  margin:auto;
+  padding:50px 20px;
+}
+
+/* CARDS */
 .cards-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:30px;
 }
 
 .card{
+  border-radius:35px;
+  overflow:hidden;
   background:white;
-  border-radius:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  transform:translateY(0);
+  transition:0.4s;
+  box-shadow:
+    0 15px 35px rgba(0,0,0,0.12),
+    0 5px 15px rgba(0,0,0,0.08);
+}
+
+.card:hover{
+  transform:translateY(-10px) scale(1.02);
 }
 
 .card-header{
-  background:var(--navy);
-  padding:25px;
+  background:linear-gradient(135deg,#2581c4,#1f6ca6);
+  padding:35px 25px;
   color:white;
+  position:relative;
 }
 
-.route-name{font-size:24px;font-weight:bold;}
-.price{color:var(--orange);font-size:30px;font-weight:bold;}
+.card-header::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,0.05);
+}
+
+.route-name{
+  font-size:28px;
+  font-weight:800;
+  margin-bottom:10px;
+  position:relative;
+  z-index:2;
+}
+
+.price{
+  color:#FFD36B;
+  font-size:38px;
+  font-weight:900;
+  margin-bottom:15px;
+  position:relative;
+  z-index:2;
+}
+
+.depart{
+  font-size:15px;
+  opacity:0.9;
+  margin-bottom:20px;
+  position:relative;
+  z-index:2;
+}
 
 .reserve-btn{
   width:100%;
-  background:var(--orange);
+  background:linear-gradient(135deg,#F09006,#ffb347);
   border:none;
-  padding:14px;
+  padding:16px;
   color:white;
   cursor:pointer;
   margin-top:10px;
+  border-radius:18px;
+  font-size:16px;
+  font-weight:bold;
+  transition:0.3s;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  position:relative;
+  z-index:2;
+}
+
+.reserve-btn:hover{
+  transform:scale(1.03);
 }
 
 /* FORM */
 .form-box{
   display:none;
   background:white;
-  padding:30px;
-  margin-top:30px;
-  border-radius:20px;
+  padding:40px;
+  margin-top:50px;
+  border-radius:35px;
+  box-shadow:
+    0 15px 35px rgba(0,0,0,0.10),
+    0 5px 15px rgba(0,0,0,0.06);
 }
 
-.input-group{margin-bottom:15px;}
+.form-title{
+  text-align:center;
+  margin-bottom:25px;
+  color:var(--navy);
+  font-family:'Syne',sans-serif;
+  font-size:32px;
+}
+
+.input-group{
+  margin-bottom:20px;
+}
 
 .input-group input,
 .input-group select{
   width:100%;
-  padding:12px;
+  padding:16px;
   border:1px solid #ddd;
-  border-radius:10px;
+  border-radius:18px;
+  font-size:15px;
+  outline:none;
+  transition:0.3s;
+}
+
+.input-group input:focus,
+.input-group select:focus{
+  border-color:var(--navy);
+  box-shadow:0 0 0 4px rgba(37,129,196,0.15);
 }
 
 button{
   width:100%;
-  padding:15px;
-  background:var(--orange);
+  padding:18px;
+  background:linear-gradient(135deg,#F09006,#ffb347);
   color:white;
   border:none;
-  border-radius:12px;
+  border-radius:20px;
   font-weight:bold;
+  font-size:17px;
+  cursor:pointer;
+  transition:0.3s;
+  box-shadow:0 10px 25px rgba(0,0,0,0.12);
 }
 
-#message{margin-top:15px;text-align:center;}
+button:hover{
+  transform:translateY(-2px);
+}
+
+#message{
+  margin-top:20px;
+  text-align:center;
+  font-weight:bold;
+  font-size:16px;
+}
+
+footer{
+  margin-top:70px;
+  text-align:center;
+  padding:30px;
+  background:var(--navy);
+  color:white;
+  font-weight:600;
+}
+
+@media(max-width:768px){
+
+  .hero h1{
+    font-size:42px;
+  }
+
+  .card-header{
+    padding:28px 20px;
+  }
+
+  .price{
+    font-size:32px;
+  }
+
+  .form-box{
+    padding:25px;
+  }
+
+}
 
 </style>
 </head>
@@ -107,6 +241,10 @@ button{
 
 <header class="hero">
   <h1>YEKSINA <span>VOYAGE</span></h1>
+
+  <p>
+    Réservez vos voyages universitaires rapidement et payez avec Wave.
+  </p>
 </header>
 
 <main class="container">
@@ -114,27 +252,72 @@ button{
 <!-- TRAJETS -->
 <div class="cards-grid">
 
+  <!-- DAKAR -->
   <div class="card">
     <div class="card-header">
-      <div class="route-name">UGB → DAKAR</div>
-      <div class="price">4000 FCFA</div>
-      <button class="reserve-btn" onclick="ouvrirFormulaire('Dakar')">Réserver</button>
+
+      <div class="route-name">
+        UGB → DAKAR
+      </div>
+
+      <div class="price">
+        4000 FCFA
+      </div>
+
+      <div class="depart">
+        Départ : 04h45
+      </div>
+
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Dakar')">
+        Réserver
+      </button>
+
     </div>
   </div>
 
+  <!-- TOUBA -->
   <div class="card">
     <div class="card-header">
-      <div class="route-name">UGB → TOUBA</div>
-      <div class="price">5000 FCFA</div>
-      <button class="reserve-btn" onclick="ouvrirFormulaire('Touba')">Réserver</button>
+
+      <div class="route-name">
+        UGB → TOUBA
+      </div>
+
+      <div class="price">
+        5000 FCFA
+      </div>
+
+      <div class="depart">
+        Départ : 04h45
+      </div>
+
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Touba')">
+        Réserver
+      </button>
+
     </div>
   </div>
 
+  <!-- KAOLACK -->
   <div class="card">
     <div class="card-header">
-      <div class="route-name">UGB → KAOLACK</div>
-      <div class="price">6500 FCFA</div>
-      <button class="reserve-btn" onclick="ouvrirFormulaire('Kaolack')">Réserver</button>
+
+      <div class="route-name">
+        UGB → KAOLACK
+      </div>
+
+      <div class="price">
+        6550 FCFA
+      </div>
+
+      <div class="depart">
+        Départ : 04h45
+      </div>
+
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Kaolack')">
+        Réserver
+      </button>
+
     </div>
   </div>
 
@@ -142,6 +325,10 @@ button{
 
 <!-- FORM -->
 <div class="form-box">
+
+  <h2 class="form-title">
+    Réserver maintenant
+  </h2>
 
   <form id="reservationForm">
 
@@ -157,7 +344,7 @@ button{
       <select id="trajet"></select>
     </div>
 
-    <!-- ✔️ DATES -->
+    <!-- DATES -->
     <div class="input-group">
       <select id="date">
         <option value="2026-05-22">22 Mai</option>
@@ -170,7 +357,9 @@ button{
       <input type="number" id="places" min="1" max="10" value="1">
     </div>
 
-    <button type="submit">Payer avec Wave</button>
+    <button type="submit">
+      Payer avec Wave
+    </button>
 
   </form>
 
@@ -180,18 +369,31 @@ button{
 
 </main>
 
+<footer>
+  YEKSINA VOYAGE © 2026
+</footer>
+
 <script>
 
 /* remplir trajets */
 const trajetSelect = document.getElementById("trajet");
+
 ["Dakar","Touba","Kaolack"].forEach(t=>{
   trajetSelect.innerHTML += `<option value="${t}">${t}</option>`;
 });
 
+/* ouvrir formulaire */
 function ouvrirFormulaire(dest){
+
   document.querySelector(".form-box").style.display="block";
+
   document.getElementById("trajet").value = dest;
-  window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
+
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior:"smooth"
+  });
+
 }
 
 /* nettoyage téléphone */
@@ -199,22 +401,38 @@ function normalizeTel(t){
   return t.replace(/\D/g,"");
 }
 
-document.getElementById("reservationForm").addEventListener("submit", async (e)=>{
+/* reservation */
+document.getElementById("reservationForm")
+.addEventListener("submit", async (e)=>{
+
   e.preventDefault();
 
   const nom = document.getElementById("nom").value;
-  const telephone = normalizeTel(document.getElementById("telephone").value);
+
+  const telephone =
+    normalizeTel(document.getElementById("telephone").value);
+
   const trajet = document.getElementById("trajet").value;
+
   const places = document.getElementById("places").value;
+
   const date = document.getElementById("date").value;
 
   const message = document.getElementById("message");
-  message.innerHTML = "⏳ Traitement...";
+
+  message.style.color="#2581c4";
+
+  message.innerHTML="⏳ Traitement de votre réservation...";
 
   try{
+
     const res = await fetch("/reserver",{
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
       body: JSON.stringify({
         nom,
         telephone,
@@ -222,24 +440,39 @@ document.getElementById("reservationForm").addEventListener("submit", async (e)=
         places,
         date
       })
+
     });
 
     const data = await res.json();
 
     if(data.success){
+
+      message.style.color="green";
+
+      message.innerHTML =
+        "✅ Redirection vers Wave...";
+
       window.location.href = data.paymentUrl;
+
     }else{
+
       message.style.color="red";
-      message.innerHTML=data.message;
+
+      message.innerHTML = data.message;
+
     }
 
   }catch(err){
+
     message.style.color="red";
-    message.innerHTML="Erreur serveur";
+
+    message.innerHTML = "Erreur serveur";
+
   }
+
 });
 
 </script>
 
 </body>
-</html
+</html>
