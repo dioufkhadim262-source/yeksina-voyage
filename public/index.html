@@ -100,6 +100,23 @@ body{
   font-weight:800;
 }
 
+.reserve-btn{
+  width:100%;
+  margin-top:18px;
+  background:#FF6B00;
+  color:white;
+  border:none;
+  padding:14px;
+  border-radius:12px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:15px;
+}
+
+.reserve-btn:hover{
+  opacity:0.9;
+}
+
 .form-box{
   background:white;
   padding:35px;
@@ -107,6 +124,7 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,0.08);
   max-width:700px;
   margin:auto;
+  display:none;
 }
 
 .form-box h2{
@@ -191,35 +209,83 @@ footer{
 
   <div class="cards-grid">
 
+    <!-- DAKAR -->
     <div class="card">
       <div class="card-header">
-        <div class="route-name">UGB → DAKAR</div>
-        <div class="departure-time">Départ : 04h45</div>
-        <div class="price">4 000 FCFA</div>
+
+        <div class="route-name">
+          UGB → DAKAR
+        </div>
+
+        <div class="departure-time">
+          Départ : 04h45
+        </div>
+
+        <div class="price">
+          4 000 FCFA
+        </div>
+
+        <button class="reserve-btn" onclick="ouvrirFormulaire('Dakar')">
+          Réserver
+        </button>
+
       </div>
     </div>
 
+    <!-- TOUBA -->
     <div class="card">
       <div class="card-header">
-        <div class="route-name">UGB → TOUBA</div>
-        <div class="departure-time">Départ : 04h45</div>
-        <div class="price">5 000 FCFA</div>
+
+        <div class="route-name">
+          UGB → TOUBA
+        </div>
+
+        <div class="departure-time">
+          Départ : 04h45
+        </div>
+
+        <div class="price">
+          5 000 FCFA
+        </div>
+
+        <button class="reserve-btn" onclick="ouvrirFormulaire('Touba')">
+          Réserver
+        </button>
+
       </div>
     </div>
 
+    <!-- KAOLACK -->
     <div class="card">
       <div class="card-header">
-        <div class="route-name">UGB → KAOLACK</div>
-        <div class="departure-time">Départ : 04h45</div>
-        <div class="price">6 000 FCFA</div>
+
+        <div class="route-name">
+          UGB → KAOLACK
+        </div>
+
+        <div class="departure-time">
+          Départ : 04h45
+        </div>
+
+        <div class="price">
+          6 500 FCFA
+        </div>
+
+        <button class="reserve-btn" onclick="ouvrirFormulaire('Kaolack')">
+          Réserver
+        </button>
+
       </div>
     </div>
 
   </div>
 
+  <!-- FORMULAIRE -->
   <div class="form-box">
 
-    <h2>Réserver maintenant</h2>
+    <h2>
+      Réserver maintenant
+    </h2>
 
     <form id="reservationForm">
 
@@ -234,6 +300,7 @@ footer{
       </div>
 
       <div class="input-group">
+
         <label>Destination</label>
 
         <select id="trajet">
@@ -243,11 +310,21 @@ footer{
           <option value="Kaolack">Kaolack</option>
 
         </select>
+
       </div>
 
       <div class="input-group">
+
         <label>Nombre de places</label>
-        <input type="number" id="places" min="1" max="10" value="1">
+
+        <input
+          type="number"
+          id="places"
+          min="1"
+          max="10"
+          value="1"
+        >
+
       </div>
 
       <button type="submit">
@@ -268,6 +345,20 @@ footer{
 
 <script>
 
+function ouvrirFormulaire(destination){
+
+  const formBox = document.querySelector(".form-box");
+
+  formBox.style.display = "block";
+
+  document.getElementById("trajet").value = destination;
+
+  formBox.scrollIntoView({
+    behavior:"smooth"
+  });
+
+}
+
 const form = document.getElementById("reservationForm");
 
 form.addEventListener("submit", async (e)=>{
@@ -275,13 +366,17 @@ form.addEventListener("submit", async (e)=>{
   e.preventDefault();
 
   const nom = document.getElementById("nom").value;
+
   const telephone = document.getElementById("telephone").value;
+
   const trajet = document.getElementById("trajet").value;
+
   const places = document.getElementById("places").value;
 
   const message = document.getElementById("message");
 
   message.style.color = "#0B1F4E";
+
   message.innerHTML = "⏳ Redirection vers Wave...";
 
   try{
@@ -312,6 +407,7 @@ form.addEventListener("submit", async (e)=>{
     }else{
 
       message.style.color = "red";
+
       message.innerHTML = data.message;
 
     }
@@ -319,6 +415,7 @@ form.addEventListener("submit", async (e)=>{
   }catch(err){
 
     message.style.color = "red";
+
     message.innerHTML = "Erreur serveur.";
 
   }
