@@ -12,20 +12,14 @@
 :root{
   --orange:#FF6B00;
   --navy:#0B1F4E;
-  --white:#fff;
   --bg:#F5F3EE;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
 
 body{
   font-family:'DM Sans',sans-serif;
   background:var(--bg);
-  color:#111;
 }
 
 .hero{
@@ -38,42 +32,21 @@ body{
 .hero h1{
   font-family:'Syne',sans-serif;
   font-size:60px;
-  line-height:1;
 }
 
-.hero span{
-  color:var(--orange);
-}
+.hero span{color:var(--orange);}
 
-.hero p{
-  margin-top:18px;
-  color:rgba(255,255,255,0.7);
-}
-
-.container{
-  max-width:1100px;
-  margin:auto;
-  padding:40px 20px;
-}
-
-.section-title{
-  text-align:center;
-  margin-bottom:35px;
-  color:var(--navy);
-  font-family:'Syne',sans-serif;
-}
+.container{max-width:1100px;margin:auto;padding:40px 20px;}
 
 .cards-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:20px;
-  margin-bottom:60px;
 }
 
 .card{
   background:white;
   border-radius:20px;
-  overflow:hidden;
   box-shadow:0 10px 25px rgba(0,0,0,0.08);
 }
 
@@ -83,105 +56,49 @@ body{
   color:white;
 }
 
-.route-name{
-  font-size:24px;
-  font-weight:bold;
-}
-
-.departure-time{
-  margin-top:10px;
-  opacity:0.7;
-}
-
-.price{
-  margin-top:18px;
-  font-size:34px;
-  color:var(--orange);
-  font-weight:800;
-}
+.route-name{font-size:24px;font-weight:bold;}
+.price{color:var(--orange);font-size:30px;font-weight:bold;}
 
 .reserve-btn{
   width:100%;
-  margin-top:18px;
-  background:#FF6B00;
-  color:white;
+  background:var(--orange);
   border:none;
   padding:14px;
-  border-radius:12px;
-  font-weight:bold;
+  color:white;
   cursor:pointer;
-  font-size:15px;
+  margin-top:10px;
 }
 
-.reserve-btn:hover{
-  opacity:0.9;
-}
-
+/* FORM */
 .form-box{
-  background:white;
-  padding:35px;
-  border-radius:22px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.08);
-  max-width:700px;
-  margin:auto;
   display:none;
+  background:white;
+  padding:30px;
+  margin-top:30px;
+  border-radius:20px;
 }
 
-.form-box h2{
-  text-align:center;
-  margin-bottom:25px;
-  color:var(--navy);
-  font-family:'Syne',sans-serif;
-}
-
-.input-group{
-  margin-bottom:18px;
-}
-
-.input-group label{
-  display:block;
-  margin-bottom:8px;
-  font-weight:600;
-}
+.input-group{margin-bottom:15px;}
 
 .input-group input,
 .input-group select{
   width:100%;
-  padding:15px;
-  border-radius:12px;
+  padding:12px;
   border:1px solid #ddd;
-  font-size:15px;
+  border-radius:10px;
 }
 
 button{
   width:100%;
-  border:none;
+  padding:15px;
   background:var(--orange);
   color:white;
-  padding:17px;
-  border-radius:14px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:0.9;
-}
-
-#message{
-  margin-top:20px;
-  text-align:center;
+  border:none;
+  border-radius:12px;
   font-weight:bold;
 }
 
-footer{
-  margin-top:80px;
-  background:var(--navy);
-  color:white;
-  padding:30px;
-  text-align:center;
-}
+#message{margin-top:15px;text-align:center;}
 
 </style>
 </head>
@@ -189,237 +106,137 @@ footer{
 <body>
 
 <header class="hero">
-
-  <h1>
-    YEKSINA<br>
-    <span>VOYAGE</span>
-  </h1>
-
-  <p>
-    Réservez votre place rapidement et payez avec Wave.
-  </p>
-
+  <h1>YEKSINA <span>VOYAGE</span></h1>
 </header>
 
 <main class="container">
 
-  <h2 class="section-title">
-    Destinations disponibles
-  </h2>
+<!-- TRAJETS -->
+<div class="cards-grid">
 
-  <div class="cards-grid">
-
-    <!-- DAKAR -->
-    <div class="card">
-      <div class="card-header">
-
-        <div class="route-name">
-          UGB → DAKAR
-        </div>
-
-        <div class="departure-time">
-          Départ : 04h45
-        </div>
-
-        <div class="price">
-          4 000 FCFA
-        </div>
-
-        <button class="reserve-btn" onclick="ouvrirFormulaire('Dakar')">
-          Réserver
-        </button>
-
-      </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="route-name">UGB → DAKAR</div>
+      <div class="price">4000 FCFA</div>
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Dakar')">Réserver</button>
     </div>
-
-    <!-- TOUBA -->
-    <div class="card">
-      <div class="card-header">
-
-        <div class="route-name">
-          UGB → TOUBA
-        </div>
-
-        <div class="departure-time">
-          Départ : 04h45
-        </div>
-
-        <div class="price">
-          5 000 FCFA
-        </div>
-
-        <button class="reserve-btn" onclick="ouvrirFormulaire('Touba')">
-          Réserver
-        </button>
-
-      </div>
-    </div>
-
-    <!-- KAOLACK -->
-    <div class="card">
-      <div class="card-header">
-
-        <div class="route-name">
-          UGB → KAOLACK
-        </div>
-
-        <div class="departure-time">
-          Départ : 04h45
-        </div>
-
-        <div class="price">
-          6 500 FCFA
-        </div>
-
-        <button class="reserve-btn" onclick="ouvrirFormulaire('Kaolack')">
-          Réserver
-        </button>
-
-      </div>
-    </div>
-
   </div>
 
-  <!-- FORMULAIRE -->
-  <div class="form-box">
-
-    <h2>
-      Réserver maintenant
-    </h2>
-
-    <form id="reservationForm">
-
-      <div class="input-group">
-        <label>Nom complet</label>
-        <input type="text" id="nom" required>
-      </div>
-
-      <div class="input-group">
-        <label>Téléphone</label>
-        <input type="text" id="telephone" required>
-      </div>
-
-      <div class="input-group">
-
-        <label>Destination</label>
-
-        <select id="trajet">
-
-          <option value="Dakar">Dakar</option>
-          <option value="Touba">Touba</option>
-          <option value="Kaolack">Kaolack</option>
-
-        </select>
-
-      </div>
-
-      <div class="input-group">
-
-        <label>Nombre de places</label>
-
-        <input
-          type="number"
-          id="places"
-          min="1"
-          max="10"
-          value="1"
-        >
-
-      </div>
-
-      <button type="submit">
-        Payer avec Wave
-      </button>
-
-    </form>
-
-    <div id="message"></div>
-
+  <div class="card">
+    <div class="card-header">
+      <div class="route-name">UGB → TOUBA</div>
+      <div class="price">5000 FCFA</div>
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Touba')">Réserver</button>
+    </div>
   </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="route-name">UGB → KAOLACK</div>
+      <div class="price">6500 FCFA</div>
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Kaolack')">Réserver</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FORM -->
+<div class="form-box">
+
+  <form id="reservationForm">
+
+    <div class="input-group">
+      <input type="text" id="nom" placeholder="Nom complet" required>
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="telephone" placeholder="Téléphone (+221...)" required>
+    </div>
+
+    <div class="input-group">
+      <select id="trajet"></select>
+    </div>
+
+    <!-- ✔️ DATES -->
+    <div class="input-group">
+      <select id="date">
+        <option value="2026-05-22">22 Mai</option>
+        <option value="2026-05-23">23 Mai</option>
+        <option value="2026-05-24">24 Mai</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <input type="number" id="places" min="1" max="10" value="1">
+    </div>
+
+    <button type="submit">Payer avec Wave</button>
+
+  </form>
+
+  <div id="message"></div>
+
+</div>
 
 </main>
 
-<footer>
-  YEKSINA VOYAGE © 2026
-</footer>
-
 <script>
 
-function ouvrirFormulaire(destination){
+/* remplir trajets */
+const trajetSelect = document.getElementById("trajet");
+["Dakar","Touba","Kaolack"].forEach(t=>{
+  trajetSelect.innerHTML += `<option value="${t}">${t}</option>`;
+});
 
-  const formBox = document.querySelector(".form-box");
-
-  formBox.style.display = "block";
-
-  document.getElementById("trajet").value = destination;
-
-  formBox.scrollIntoView({
-    behavior:"smooth"
-  });
-
+function ouvrirFormulaire(dest){
+  document.querySelector(".form-box").style.display="block";
+  document.getElementById("trajet").value = dest;
+  window.scrollTo({ top: document.body.scrollHeight, behavior:"smooth" });
 }
 
-const form = document.getElementById("reservationForm");
+/* nettoyage téléphone */
+function normalizeTel(t){
+  return t.replace(/\D/g,"");
+}
 
-form.addEventListener("submit", async (e)=>{
-
+document.getElementById("reservationForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
 
   const nom = document.getElementById("nom").value;
-
-  const telephone = document.getElementById("telephone").value;
-
+  const telephone = normalizeTel(document.getElementById("telephone").value);
   const trajet = document.getElementById("trajet").value;
-
   const places = document.getElementById("places").value;
+  const date = document.getElementById("date").value;
 
   const message = document.getElementById("message");
-
-  message.style.color = "#0B1F4E";
-
-  message.innerHTML = "⏳ Redirection vers Wave...";
+  message.innerHTML = "⏳ Traitement...";
 
   try{
-
-    const response = await fetch("/reserver",{
-
+    const res = await fetch("/reserver",{
       method:"POST",
-
-      headers:{
-        "Content-Type":"application/json"
-      },
-
-      body:JSON.stringify({
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
         nom,
         telephone,
         trajet,
-        places
+        places,
+        date
       })
-
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
     if(data.success){
-
       window.location.href = data.paymentUrl;
-
     }else{
-
-      message.style.color = "red";
-
-      message.innerHTML = data.message;
-
+      message.style.color="red";
+      message.innerHTML=data.message;
     }
 
   }catch(err){
-
-    message.style.color = "red";
-
-    message.innerHTML = "Erreur serveur.";
-
+    message.style.color="red";
+    message.innerHTML="Erreur serveur";
   }
-
 });
 
 </script>
