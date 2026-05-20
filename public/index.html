@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YEKSINA VOYAGE — Réservation en ligne</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF6B00;
+    --orange-light: #FF8C33;
+    --orange-faint: #FFF3E8;
+    --navy: #0B1F4E;
+    --navy-mid: #1A3575;
+    --navy-light: #E8EDF8;
+    --gold: #FFB800;
+    --white: #FFFFFF;
+    --gray-50: #F9F9F9;
+    --gray-100: #F0F0EF;
+    --gray-300: #BDBDBC;
+    --gray-600: #6B6B69;
+    --text: #111111;
+    --success: #1D9E75;
+    --error: #E24B4A;
+    --radius: 18px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(11,31,78,0.12);
+    --shadow-lg: 0 20px 60px rgba(11,31,78,0.2);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F5F3EE;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HERO BANNER ─────────────────────────── */
+  .hero {
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+    padding: 60px 24px 80px;
+    text-align: center;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(255,107,0,0.35) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(255,184,0,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,107,0,0.15);
+    border: 1px solid rgba(255,107,0,0.35);
+    color: var(--orange-light);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 7vw, 64px);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.05;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+  }
+
+  .hero h1 span { color: var(--orange); }
+
+  .hero p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    max-width: 480px;
+    margin: 0 auto 32px;
+    line-height: 1.6;
+  }
+
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .hero-meta-item svg {
+    width: 18px; height: 18px;
+    stroke: var(--orange);
+    fill: none;
+    stroke-width: 1.8;
+    flex-shrink: 0;
+  }
+
+  /* ── PLACES INDICATOR ────────────────────── */
+  .places-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-100);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .place-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+  }
+
+  .place-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--success);
+    flex-shrink: 0;
+  }
+
+  .place-dot.low { background: var(--orange); }
+  .place-dot.empty { background: var(--error); }
+
+  .place-count {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── MAIN GRID ───────────────────────────── */
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+    padding: 52px 0 32px;
+    letter-spacing: -0.3px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 22px;
+    padding-bottom: 60px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid rgba(0,0,0,0.07);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card.featured {
+    border: 2px solid var(--orange);
+    transform: scale(1.025);
+  }
+
+  .card-header {
+    padding: 22px 24px 18px;
+    background: var(--navy);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .route-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .route-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .route-arrow {
+    color: var(--orange);
+    font-size: 18px;
+  }
+
+  .departure-time {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .departure-time span {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .price-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  .price-unit {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+  }
+</style>
+</head>
+
+<body>
+
+<header class="hero">
+  <div class="hero-badge">Transport Longue Distance</div>
+  <h1>YEKSINA<br><span>VOYAGE</span></h1>
+  <p>Réservez votre place en quelques secondes. Départ quotidien depuis UGB.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      Départ à 4:45
+    </div>
+    <div class="hero-meta-item">
+      UGB — Dakar / Touba / Kaolack
+    </div>
+    <div class="hero-meta-item">
+      Paiement Wave sécurisé
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <h2 class="section-title">Choisissez votre destination</h2>
+
+  <div class="cards-grid">
+
+    <!-- DAKAR -->
+    <div class="card">
+      <div class="card-header">
+        <div class="route-name">UGB → DAKAR</div>
+        <div class="departure-time">Départ à <span>4:45</span></div>
+        <div class="card-price">
+          <span class="price-amount">4 000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOUBA -->
+    <div class="card">
+      <div class="card-header">
+        <div class="route-name">UGB → TOUBA</div>
+        <div class="departure-time">Départ à <span>4:45</span></div>
+        <div class="card-price">
+          <span class="price-amount">5 000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KAOLACK -->
+    <div class="card">
+      <div class="card-header">
+        <div class="route-name">UGB → KAOLACK</div>
+        <div class="departure-time">Départ à <span>4:45</span></div>
+        <div class="card-price">
+          <span class="price-amount">6500</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
