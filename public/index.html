@@ -30,9 +30,21 @@ body{
 .hero{
   background:linear-gradient(135deg,#2581c4,#1a5d91);
   color:white;
-  padding:80px 20px;
+  padding:60px 20px;
   text-align:center;
   box-shadow:0 8px 30px rgba(0,0,0,0.15);
+}
+
+/* 🔥 LOGO STYLE AJOUTÉ */
+.logo{
+  width:110px;
+  height:110px;
+  object-fit:contain;
+  background:white;
+  padding:10px;
+  border-radius:20px;
+  margin-bottom:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.25);
 }
 
 .hero h1{
@@ -83,39 +95,22 @@ body{
   background:linear-gradient(135deg,#2581c4,#1f6ca6);
   padding:35px 25px;
   color:white;
-  position:relative;
-}
-
-.card-header::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(255,255,255,0.05);
 }
 
 .route-name{
   font-size:28px;
   font-weight:800;
-  margin-bottom:10px;
-  position:relative;
-  z-index:2;
 }
 
 .price{
   color:#FFD36B;
   font-size:38px;
   font-weight:900;
-  margin-bottom:15px;
-  position:relative;
-  z-index:2;
 }
 
 .depart{
   font-size:15px;
   opacity:0.9;
-  margin-bottom:20px;
-  position:relative;
-  z-index:2;
 }
 
 .reserve-btn{
@@ -130,9 +125,6 @@ body{
   font-size:16px;
   font-weight:bold;
   transition:0.3s;
-  box-shadow:0 8px 20px rgba(0,0,0,0.15);
-  position:relative;
-  z-index:2;
 }
 
 .reserve-btn:hover{
@@ -146,9 +138,7 @@ body{
   padding:40px;
   margin-top:50px;
   border-radius:35px;
-  box-shadow:
-    0 15px 35px rgba(0,0,0,0.10),
-    0 5px 15px rgba(0,0,0,0.06);
+  box-shadow:0 15px 35px rgba(0,0,0,0.10);
 }
 
 .form-title{
@@ -170,14 +160,6 @@ body{
   border:1px solid #ddd;
   border-radius:18px;
   font-size:15px;
-  outline:none;
-  transition:0.3s;
-}
-
-.input-group input:focus,
-.input-group select:focus{
-  border-color:var(--navy);
-  box-shadow:0 0 0 4px rgba(37,129,196,0.15);
 }
 
 button{
@@ -190,19 +172,12 @@ button{
   font-weight:bold;
   font-size:17px;
   cursor:pointer;
-  transition:0.3s;
-  box-shadow:0 10px 25px rgba(0,0,0,0.12);
-}
-
-button:hover{
-  transform:translateY(-2px);
 }
 
 #message{
   margin-top:20px;
   text-align:center;
   font-weight:bold;
-  font-size:16px;
 }
 
 footer{
@@ -214,121 +189,60 @@ footer{
   font-weight:600;
 }
 
-@media(max-width:768px){
-
-  .hero h1{
-    font-size:42px;
-  }
-
-  .card-header{
-    padding:28px 20px;
-  }
-
-  .price{
-    font-size:32px;
-  }
-
-  .form-box{
-    padding:25px;
-  }
-
-}
-
 </style>
 </head>
 
 <body>
 
 <header class="hero">
+
+  <!-- 🔥 LOGO INTÉGRÉ -->
+  <img src="/logo.png" class="logo" alt="logo">
+
   <h1>YEKSINA <span>VOYAGE</span></h1>
 
   <p>
     Réservez vos voyages universitaires rapidement et payez avec Wave.
   </p>
+
 </header>
 
 <main class="container">
 
-<!-- TRAJETS -->
 <div class="cards-grid">
 
-  <!-- DAKAR -->
   <div class="card">
     <div class="card-header">
-
-      <div class="route-name">
-        UGB → DAKAR
-      </div>
-
-      <div class="price">
-        4000 FCFA
-      </div>
-
-      <div class="depart">
-        Départ : 04h45
-      </div>
-
-      <button class="reserve-btn" onclick="ouvrirFormulaire('Dakar')">
-        Réserver
-      </button>
-
+      <div class="route-name">UGB → DAKAR</div>
+      <div class="price">4000 FCFA</div>
+      <div class="depart">Départ : 04h45</div>
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Dakar')">Réserver</button>
     </div>
   </div>
 
-  <!-- TOUBA -->
   <div class="card">
     <div class="card-header">
-
-      <div class="route-name">
-        UGB → TOUBA
-      </div>
-
-      <div class="price">
-        5000 FCFA
-      </div>
-
-      <div class="depart">
-        Départ : 04h45
-      </div>
-
-      <button class="reserve-btn" onclick="ouvrirFormulaire('Touba')">
-        Réserver
-      </button>
-
+      <div class="route-name">UGB → TOUBA</div>
+      <div class="price">5000 FCFA</div>
+      <div class="depart">Départ : 04h45</div>
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Touba')">Réserver</button>
     </div>
   </div>
 
-  <!-- KAOLACK -->
   <div class="card">
     <div class="card-header">
-
-      <div class="route-name">
-        UGB → KAOLACK
-      </div>
-
-      <div class="price">
-        6600 FCFA
-      </div>
-
-      <div class="depart">
-        Départ : 04h45
-      </div>
-
-      <button class="reserve-btn" onclick="ouvrirFormulaire('Kaolack')">
-        Réserver
-      </button>
-
+      <div class="route-name">UGB → KAOLACK</div>
+      <div class="price">6600 FCFA</div>
+      <div class="depart">Départ : 04h45</div>
+      <button class="reserve-btn" onclick="ouvrirFormulaire('Kaolack')">Réserver</button>
     </div>
   </div>
 
 </div>
 
-<!-- FORM -->
 <div class="form-box">
 
-  <h2 class="form-title">
-    Réserver maintenant
-  </h2>
+  <h2 class="form-title">Réserver maintenant</h2>
 
   <form id="reservationForm">
 
@@ -337,14 +251,13 @@ footer{
     </div>
 
     <div class="input-group">
-      <input type="text" id="telephone" placeholder="Téléphone (+221...)" required>
+      <input type="text" id="telephone" placeholder="Téléphone" required>
     </div>
 
     <div class="input-group">
       <select id="trajet"></select>
     </div>
 
-    <!-- DATES -->
     <div class="input-group">
       <select id="date">
         <option value="2026-05-22">22 Mai</option>
@@ -354,12 +267,10 @@ footer{
     </div>
 
     <div class="input-group">
-      <input type="number" id="places" min="1" max="10" value="1">
+      <input type="number" id="places" value="1">
     </div>
 
-    <button type="submit">
-      Payer avec Wave
-    </button>
+    <button type="submit">Payer avec Wave</button>
 
   </form>
 
@@ -375,101 +286,40 @@ footer{
 
 <script>
 
-/* remplir trajets */
-const trajetSelect = document.getElementById("trajet");
-
 ["Dakar","Touba","Kaolack"].forEach(t=>{
-  trajetSelect.innerHTML += `<option value="${t}">${t}</option>`;
+  document.getElementById("trajet").innerHTML += `<option value="${t}">${t}</option>`;
 });
 
-/* ouvrir formulaire */
 function ouvrirFormulaire(dest){
-
   document.querySelector(".form-box").style.display="block";
-
   document.getElementById("trajet").value = dest;
-
-  window.scrollTo({
-    top: document.body.scrollHeight,
-    behavior:"smooth"
-  });
-
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
 }
 
-/* nettoyage téléphone */
-function normalizeTel(t){
-  return t.replace(/\D/g,"");
-}
+function normalizeTel(t){return t.replace(/\D/g,"");}
 
-/* reservation */
-document.getElementById("reservationForm")
-.addEventListener("submit", async (e)=>{
-
+document.getElementById("reservationForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
 
-  const nom = document.getElementById("nom").value;
+  const res = await fetch("/reserver",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      nom:document.getElementById("nom").value,
+      telephone:normalizeTel(document.getElementById("telephone").value),
+      trajet:document.getElementById("trajet").value,
+      places:document.getElementById("places").value,
+      date:document.getElementById("date").value
+    })
+  });
 
-  const telephone =
-    normalizeTel(document.getElementById("telephone").value);
+  const data = await res.json();
 
-  const trajet = document.getElementById("trajet").value;
-
-  const places = document.getElementById("places").value;
-
-  const date = document.getElementById("date").value;
-
-  const message = document.getElementById("message");
-
-  message.style.color="#2581c4";
-
-  message.innerHTML="⏳ Traitement de votre réservation...";
-
-  try{
-
-    const res = await fetch("/reserver",{
-      method:"POST",
-
-      headers:{
-        "Content-Type":"application/json"
-      },
-
-      body: JSON.stringify({
-        nom,
-        telephone,
-        trajet,
-        places,
-        date
-      })
-
-    });
-
-    const data = await res.json();
-
-    if(data.success){
-
-      message.style.color="green";
-
-      message.innerHTML =
-        "✅ Redirection vers Wave...";
-
-      window.location.href = data.paymentUrl;
-
-    }else{
-
-      message.style.color="red";
-
-      message.innerHTML = data.message;
-
-    }
-
-  }catch(err){
-
-    message.style.color="red";
-
-    message.innerHTML = "Erreur serveur";
-
+  if(data.success){
+    window.location.href = data.paymentUrl;
+  } else {
+    document.getElementById("message").innerHTML = data.message;
   }
-
 });
 
 </script>
