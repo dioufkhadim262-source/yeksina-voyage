@@ -1,4 +1,4 @@
-const express    = require("express"); 
+const express    = require("express");  
 const cors       = require("cors");
 const mongoose   = require("mongoose");
 const crypto     = require("crypto");
@@ -27,19 +27,9 @@ mongoose.connect(MONGO_URI)
   .catch(err => console.error("❌ MongoDB :", err.message));
 
 /* ─────────────────────────────────────────
-   PLACES + DATES
-───────────────────────────────────────── */
-let placesDisponibles = {
-  Dakar:   14,
-  Touba:   14,
-  Kaolack: 14,
-};
-
-const datesDisponibles = ["2026-05-22", "2026-05-23", "2026-05-24"];
-
-/* ─────────────────────────────────────────
    MODEL
 ───────────────────────────────────────── */
+
 const reservationSchema = new mongoose.Schema({
   nom:        { type: String, required: true },
   telephone:  { type: String, required: true },
@@ -49,11 +39,12 @@ const reservationSchema = new mongoose.Schema({
   siege:      { type: String },
   prix:       { type: Number, required: true },
   statut:     { type: String, default: "EN_ATTENTE_PAIEMENT" },
-  paiement:   { type: String, default: "NON_PAYE" }, // ⭐ AJOUT IMPORTANT
+  paiement:   { type: String, default: "NON_PAYE" },
   codeTicket: { type: String, unique: true },
-  qrCode:     { type: String },
-  pdf:        { type: String },
   date:       { type: Date, default: Date.now },
+
+  // 🔥 VERROU 15 MIN
+  lockExpire: { type: Date, default: null }
 });
 
 const Reservation = mongoose.model("Reservation", reservationSchema);
@@ -61,6 +52,7 @@ const Reservation = mongoose.model("Reservation", reservationSchema);
 /* ─────────────────────────────────────────
    HELPERS
 ───────────────────────────────────────── */
+
 function normalizeTel(v){
   return String(v).replace(/\D/g,"");
 }
@@ -84,34 +76,14 @@ function getPrix(trajet){
   }[trajet] || 5000;
 }
 
-function genererSiege(restantes){
-  const lettres = ["A","B","C","D"];
-  return lettres[Math.floor(Math.random()*lettres.length)] + restantes;
-}
-
 function genererCodeTicket(){
   return "YKS-" + crypto.randomBytes(4).toString("hex").toUpperCase();
 }
 
 /* ─────────────────────────────────────────
-   ADMIN ROUTES
+   ADMIN (PAYE ONLY = IMPORTANT)
 ───────────────────────────────────────── */
 
-app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "admin.html"));
-});
-
-/* ✔️ toutes réservations */
-app.get("/admin/reservations", async (req, res) => {
-  try {
-    const data = await Reservation.find().sort({ date: -1 });
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: "Erreur serveur" });
-  }
-});
-
-/* ✔️ uniquement PAYÉS */
 app.get("/admin/reservations/payees", async (req, res) => {
   try {
     const data = await Reservation.find({ paiement: "PAYE" }).sort({ date: -1 });
@@ -121,51 +93,27 @@ app.get("/admin/reservations/payees", async (req, res) => {
   }
 });
 
-/* ✔️ stats */
-app.get("/admin/stats", async (req, res) => {
-  try {
-    const reservations = await Reservation.find();
-
-    let stats = {
-      totalClients: reservations.length,
-      totalPlaces: 0,
-      totalRevenue: 0,
-      parTrajet: { Dakar: 0, Touba: 0, Kaolack: 0 }
-    };
-
-    reservations.forEach(r => {
-      stats.totalPlaces += r.places;
-      stats.totalRevenue += r.prix * r.places;
-      stats.parTrajet[r.trajet] += r.places;
-    });
-
-    res.json(stats);
-  } catch (err) {
-    res.status(500).json({ error: "Erreur stats" });
-  }
-});
-
-/* ✔️ VALIDER PAIEMENT MANUEL */
-app.patch("/admin/valider/:id", async (req, res) => {
-  try {
-    await Reservation.findByIdAndUpdate(req.params.id, {
-      paiement: "PAYE",
-      statut: "PAYE"
-    });
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Erreur validation" });
-  }
-});
-
 /* ─────────────────────────────────────────
-   ROUTES
+   EXPIRATION AUTO (15 MIN)
 ───────────────────────────────────────── */
 
-app.get("/places",(req,res)=>{
-  res.json(placesDisponibles);
-});
+setInterval(async () => {
+  try {
+    const now = new Date();
+
+    await Reservation.deleteMany({
+      paiement: "NON_PAYE",
+      lockExpire: { $lt: now }
+    });
+
+  } catch (err) {
+    console.error("Erreur expiration:", err.message);
+  }
+}, 60 * 1000);
+
+/* ─────────────────────────────────────────
+   RESERVATION
+───────────────────────────────────────── */
 
 app.post("/reserver", async (req,res)=>{
   try{
@@ -175,25 +123,20 @@ app.post("/reserver", async (req,res)=>{
       return res.json({success:false,message:"Champs manquants"});
     }
 
-    if(!datesDisponibles.includes(date)){
-      return res.json({success:false,message:"Date invalide"});
-    }
-
     if(!isNom(nom) || !isTel(telephone)){
       return res.json({success:false,message:"Données invalides"});
     }
 
     const nbPlaces = parseInt(places);
 
-    if(nbPlaces > placesDisponibles[trajet]){
-      return res.json({success:false,message:"Pas assez de places"});
+    if(nbPlaces < 1){
+      return res.json({success:false,message:"Nombre de places invalide"});
     }
-
-    placesDisponibles[trajet] -= nbPlaces;
 
     const prix = getPrix(trajet);
     const codeTicket = genererCodeTicket();
-    const siege = genererSiege(placesDisponibles[trajet]);
+
+    const lockExpire = new Date(Date.now() + 15 * 60 * 1000);
 
     const reservation = new Reservation({
       nom: nom.trim(),
@@ -201,10 +144,10 @@ app.post("/reserver", async (req,res)=>{
       trajet,
       places: nbPlaces,
       dateVoyage: date,
-      siege,
       prix,
       codeTicket,
-      paiement: "NON_PAYE"
+      paiement: "NON_PAYE",
+      lockExpire
     });
 
     await reservation.save();
@@ -216,13 +159,10 @@ app.post("/reserver", async (req,res)=>{
       success:true,
       ticketCode: codeTicket,
       prix,
-      siege,
-      restantes: placesDisponibles[trajet],
       paymentUrl
     });
 
   }catch(err){
-    console.error(err);
     return res.json({success:false,message:"Erreur serveur"});
   }
 });
@@ -230,6 +170,7 @@ app.post("/reserver", async (req,res)=>{
 /* ─────────────────────────────────────────
    START
 ───────────────────────────────────────── */
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=>{
   console.log("🚀 Serveur OK :", PORT);
