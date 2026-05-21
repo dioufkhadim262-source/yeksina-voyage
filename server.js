@@ -1,4 +1,4 @@
-const express    = require("express");  
+const express    = require("express");   
 const cors       = require("cors");
 const mongoose   = require("mongoose");
 const crypto     = require("crypto");
@@ -29,7 +29,6 @@ mongoose.connect(MONGO_URI)
 /* ─────────────────────────────────────────
    MODEL
 ───────────────────────────────────────── */
-
 const reservationSchema = new mongoose.Schema({
   nom:        { type: String, required: true },
   telephone:  { type: String, required: true },
@@ -42,8 +41,6 @@ const reservationSchema = new mongoose.Schema({
   paiement:   { type: String, default: "NON_PAYE" },
   codeTicket: { type: String, unique: true },
   date:       { type: Date, default: Date.now },
-
-  // 🔥 VERROU 15 MIN
   lockExpire: { type: Date, default: null }
 });
 
@@ -52,7 +49,6 @@ const Reservation = mongoose.model("Reservation", reservationSchema);
 /* ─────────────────────────────────────────
    HELPERS
 ───────────────────────────────────────── */
-
 function normalizeTel(v){
   return String(v).replace(/\D/g,"");
 }
@@ -81,9 +77,25 @@ function genererCodeTicket(){
 }
 
 /* ─────────────────────────────────────────
-   ADMIN (PAYE ONLY = IMPORTANT)
+   🔥 ADMIN ROUTES AJOUTÉES
 ───────────────────────────────────────── */
 
+/* PAGE ADMIN */
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
+/* TOUTES LES RESERVATIONS */
+app.get("/admin/reservations", async (req, res) => {
+  try {
+    const data = await Reservation.find().sort({ date: -1 });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+/* PAYEES SEULEMENT */
 app.get("/admin/reservations/payees", async (req, res) => {
   try {
     const data = await Reservation.find({ paiement: "PAYE" }).sort({ date: -1 });
@@ -93,10 +105,47 @@ app.get("/admin/reservations/payees", async (req, res) => {
   }
 });
 
+/* STATISTIQUES ADMIN */
+app.get("/admin/stats", async (req, res) => {
+  try {
+    const reservations = await Reservation.find();
+
+    let stats = {
+      totalClients: reservations.length,
+      totalPlaces: 0,
+      totalRevenue: 0,
+      parTrajet: { Dakar: 0, Touba: 0, Kaolack: 0 }
+    };
+
+    reservations.forEach(r => {
+      stats.totalPlaces += r.places;
+      stats.totalRevenue += r.prix * r.places;
+      stats.parTrajet[r.trajet] += r.places;
+    });
+
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: "Erreur stats" });
+  }
+});
+
+/* VALIDATION PAIEMENT */
+app.patch("/admin/valider/:id", async (req, res) => {
+  try {
+    await Reservation.findByIdAndUpdate(req.params.id, {
+      paiement: "PAYE",
+      statut: "PAYE"
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur validation" });
+  }
+});
+
 /* ─────────────────────────────────────────
    EXPIRATION AUTO (15 MIN)
 ───────────────────────────────────────── */
-
 setInterval(async () => {
   try {
     const now = new Date();
@@ -114,7 +163,6 @@ setInterval(async () => {
 /* ─────────────────────────────────────────
    RESERVATION
 ───────────────────────────────────────── */
-
 app.post("/reserver", async (req,res)=>{
   try{
     let { nom, telephone, trajet, places, date } = req.body;
@@ -170,7 +218,6 @@ app.post("/reserver", async (req,res)=>{
 /* ─────────────────────────────────────────
    START
 ───────────────────────────────────────── */
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=>{
   console.log("🚀 Serveur OK :", PORT);
