@@ -1,4 +1,4 @@
-const express    = require("express");
+const express    = require("express"); 
 const cors       = require("cors");
 const mongoose   = require("mongoose");
 const crypto     = require("crypto");
@@ -45,7 +45,7 @@ const reservationSchema = new mongoose.Schema({
   telephone:  { type: String, required: true },
   trajet:     { type: String, required: true, enum: ["Dakar","Touba","Kaolack"] },
   places:     { type: Number, required: true },
-  dateVoyage: { type: String, required: true }, // ✔️ AJOUT
+  dateVoyage: { type: String, required: true },
   siege:      { type: String },
   prix:       { type: Number, required: true },
   statut:     { type: String, default: "EN_ATTENTE_PAIEMENT" },
@@ -60,7 +60,6 @@ const Reservation = mongoose.model("Reservation", reservationSchema);
 /* ─────────────────────────────────────────
    HELPERS
 ───────────────────────────────────────── */
-
 function normalizeTel(v){
   return String(v).replace(/\D/g,"");
 }
@@ -145,6 +144,11 @@ app.get("/places",(req,res)=>{
   res.json(placesDisponibles);
 });
 
+/* ✔️ ADMIN ROUTE AJOUTÉE */
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
 /* ✔️ RESERVATION FINAL */
 app.post("/reserver", async (req,res)=>{
   try{
@@ -190,16 +194,6 @@ app.post("/reserver", async (req,res)=>{
     });
 
     await reservation.save();
-
-    genererPDF({
-      codeTicket,
-      nom,
-      telephone,
-      trajet,
-      places: nbPlaces,
-      siege,
-      prix
-    }).then(pdf => reservation.pdf = pdf);
 
     const paymentUrl =
       `https://pay.wave.com/m/M_sn_O2mWfULdH641/c/sn/?amount=${prix * nbPlaces}`;
