@@ -81,7 +81,7 @@ function getPrix(trajet){
   return {
     Dakar: 4000,
     Touba: 5000,
-    Kaolack: 6500
+    Kaolack: 6550
   }[trajet] || 5000;
 }
 
