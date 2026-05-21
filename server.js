@@ -66,7 +66,7 @@ function isNom(v){
 
 function getPrix(trajet){
   return {
-    Dakar: 4000,
+    Dakar:3300,
     Touba: 5000,
     Kaolack: 6600
   }[trajet] || 5000;
