@@ -5,11 +5,55 @@
   <title>Admin Yeksina Voyage</title>
 </head>
 <body>
-  <h1>PAGE ADMIN</h1>
+  <h1>📊 ADMIN YEKSINA VOYAGE</h1>
 
-  <h3>Gestion simple</h3>
+  <h2>📈 Statistiques</h2>
+  <div id="stats"></div>
 
-  <p>Bienvenue dans le panneau admin</p>
+  <h2>👥 Réservations</h2>
+  <div id="reservations"></div>
 
+  <script>
+    /* STATS */
+    fetch("/admin/stats")
+      .then(res => res.json())
+      .then(s => {
+        document.getElementById("stats").innerHTML = `
+          <p>Total clients: ${s.totalClients}</p>
+          <p>Total places réservées: ${s.totalPlaces}</p>
+          <p>Revenus: ${s.totalRevenue} FCFA</p>
+          <p>Dakar: ${s.parTrajet.Dakar} places</p>
+          <p>Touba: ${s.parTrajet.Touba} places</p>
+          <p>Kaolack: ${s.parTrajet.Kaolack} places</p>
+        `;
+      });
+
+    /* RESERVATIONS */
+    fetch("/admin/reservations")
+      .then(res => res.json())
+      .then(data => {
+        const box = document.getElementById("reservations");
+
+        if (data.length === 0) {
+          box.innerHTML = "<p>Aucune réservation</p>";
+          return;
+        }
+
+        data.forEach(r => {
+          box.innerHTML += `
+            <div style="border:1px solid #000; margin:10px; padding:10px;">
+              <p><b>Nom:</b> ${r.nom}</p>
+              <p><b>Téléphone:</b> ${r.telephone}</p>
+              <p><b>Trajet:</b> ${r.trajet}</p>
+              <p><b>Date:</b> ${r.dateVoyage}</p>
+              <p><b>Places:</b> ${r.places}</p>
+              <p><b>Prix total:</b> ${r.prix * r.places} FCFA</p>
+              <p><b>Siège:</b> ${r.siege}</p>
+              <p><b>Code ticket:</b> ${r.codeTicket}</p>
+            </div>
+          `;
+        });
+      });
+  </script>
 </body>
 </html>

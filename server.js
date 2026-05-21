@@ -94,47 +94,51 @@ function genererCodeTicket(){
 }
 
 /* ─────────────────────────────────────────
-   PDF
+   ADMIN ROUTES ✔️ AJOUTÉS
 ───────────────────────────────────────── */
-const PDF_DIR = path.join(__dirname,"pdfs");
-if(!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR);
 
-async function genererPDF(reservation){
-  const { codeTicket, nom, telephone, trajet, places, siege, prix } = reservation;
+/* 🔹 Page admin */
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
 
-  const pdfPath = path.join(PDF_DIR, codeTicket+".pdf");
+/* 🔹 Toutes les réservations */
+app.get("/admin/reservations", async (req, res) => {
+  try {
+    const data = await Reservation.find().sort({ date: -1 });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
 
-  return new Promise((resolve,reject)=>{
-    const doc = new PDFDocument({ size:"A5", margins:50 });
-    const stream = fs.createWriteStream(pdfPath);
+/* 🔹 Statistiques admin */
+app.get("/admin/stats", async (req, res) => {
+  try {
+    const reservations = await Reservation.find();
 
-    doc.pipe(stream);
+    let stats = {
+      totalClients: reservations.length,
+      totalPlaces: 0,
+      totalRevenue: 0,
+      parTrajet: {
+        Dakar: 0,
+        Touba: 0,
+        Kaolack: 0
+      }
+    };
 
-    doc.fontSize(20).text("YEKSINA VOYAGE",{align:"center"});
-    doc.moveDown();
-
-    doc.fontSize(12).text(`Ticket: ${codeTicket}`);
-    doc.moveDown();
-
-    const details = [
-      ["Nom", nom],
-      ["Téléphone", telephone],
-      ["Trajet", `UGB → ${trajet}`],
-      ["Places", places],
-      ["Siège", siege],
-      ["Prix", `${prix * places} FCFA`],
-    ];
-
-    details.forEach(([a,b])=>{
-      doc.text(`${a} : ${b}`);
+    reservations.forEach(r => {
+      stats.totalPlaces += r.places;
+      stats.totalRevenue += r.prix * r.places;
+      stats.parTrajet[r.trajet] += r.places;
     });
 
-    doc.end();
-
-    stream.on("finish", ()=>resolve(codeTicket+".pdf"));
-    stream.on("error", reject);
-  });
-}
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: "Erreur stats" });
+  }
+});
 
 /* ─────────────────────────────────────────
    ROUTES
@@ -142,11 +146,6 @@ async function genererPDF(reservation){
 
 app.get("/places",(req,res)=>{
   res.json(placesDisponibles);
-});
-
-/* ✔️ ADMIN ROUTE AJOUTÉE */
-app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
 /* ✔️ RESERVATION FINAL */
