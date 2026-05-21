@@ -49,6 +49,7 @@ const reservationSchema = new mongoose.Schema({
   siege:      { type: String },
   prix:       { type: Number, required: true },
   statut:     { type: String, default: "EN_ATTENTE_PAIEMENT" },
+  paiement:   { type: String, default: "NON_PAYE" }, // ⭐ AJOUT IMPORTANT
   codeTicket: { type: String, unique: true },
   qrCode:     { type: String },
   pdf:        { type: String },
@@ -75,7 +76,6 @@ function isNom(v){
     v.trim().length >= 2;
 }
 
-/* ✔️ PRIX FIX KAOLACK */
 function getPrix(trajet){
   return {
     Dakar: 4000,
@@ -94,15 +94,14 @@ function genererCodeTicket(){
 }
 
 /* ─────────────────────────────────────────
-   ADMIN ROUTES ✔️ AJOUTÉS
+   ADMIN ROUTES
 ───────────────────────────────────────── */
 
-/* 🔹 Page admin */
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-/* 🔹 Toutes les réservations */
+/* ✔️ toutes réservations */
 app.get("/admin/reservations", async (req, res) => {
   try {
     const data = await Reservation.find().sort({ date: -1 });
@@ -112,7 +111,17 @@ app.get("/admin/reservations", async (req, res) => {
   }
 });
 
-/* 🔹 Statistiques admin */
+/* ✔️ uniquement PAYÉS */
+app.get("/admin/reservations/payees", async (req, res) => {
+  try {
+    const data = await Reservation.find({ paiement: "PAYE" }).sort({ date: -1 });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+/* ✔️ stats */
 app.get("/admin/stats", async (req, res) => {
   try {
     const reservations = await Reservation.find();
@@ -121,11 +130,7 @@ app.get("/admin/stats", async (req, res) => {
       totalClients: reservations.length,
       totalPlaces: 0,
       totalRevenue: 0,
-      parTrajet: {
-        Dakar: 0,
-        Touba: 0,
-        Kaolack: 0
-      }
+      parTrajet: { Dakar: 0, Touba: 0, Kaolack: 0 }
     };
 
     reservations.forEach(r => {
@@ -140,6 +145,20 @@ app.get("/admin/stats", async (req, res) => {
   }
 });
 
+/* ✔️ VALIDER PAIEMENT MANUEL */
+app.patch("/admin/valider/:id", async (req, res) => {
+  try {
+    await Reservation.findByIdAndUpdate(req.params.id, {
+      paiement: "PAYE",
+      statut: "PAYE"
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur validation" });
+  }
+});
+
 /* ─────────────────────────────────────────
    ROUTES
 ───────────────────────────────────────── */
@@ -148,7 +167,6 @@ app.get("/places",(req,res)=>{
   res.json(placesDisponibles);
 });
 
-/* ✔️ RESERVATION FINAL */
 app.post("/reserver", async (req,res)=>{
   try{
     let { nom, telephone, trajet, places, date } = req.body;
@@ -161,12 +179,8 @@ app.post("/reserver", async (req,res)=>{
       return res.json({success:false,message:"Date invalide"});
     }
 
-    if(!isNom(nom)){
-      return res.json({success:false,message:"Nom invalide"});
-    }
-
-    if(!isTel(telephone)){
-      return res.json({success:false,message:"Téléphone invalide"});
+    if(!isNom(nom) || !isTel(telephone)){
+      return res.json({success:false,message:"Données invalides"});
     }
 
     const nbPlaces = parseInt(places);
@@ -189,7 +203,8 @@ app.post("/reserver", async (req,res)=>{
       dateVoyage: date,
       siege,
       prix,
-      codeTicket
+      codeTicket,
+      paiement: "NON_PAYE"
     });
 
     await reservation.save();
