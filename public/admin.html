@@ -1,59 +1,173 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Yeksina Voyage</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Yeksina Voyage</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:white;
+}
+
+/* HEADER */
+header{
+  padding:20px;
+  text-align:center;
+  background:linear-gradient(90deg,#2563eb,#1e40af);
+}
+
+h1{margin:0;}
+
+/* STATS */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+  padding:20px;
+}
+
+.card{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+  text-align:center;
+}
+
+/* FILTER */
+.filters{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin:10px;
+}
+
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#2563eb;
+  color:white;
+}
+
+button:hover{
+  background:#1e40af;
+}
+
+/* LIST */
+.container{
+  padding:20px;
+  display:grid;
+  gap:15px;
+}
+
+.reservation{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  border-left:5px solid #2563eb;
+}
+
+.payee{
+  border-left:5px solid #22c55e;
+}
+
+.nonpayee{
+  border-left:5px solid #ef4444;
+}
+
+small{
+  color:#94a3b8;
+}
+</style>
 </head>
+
 <body>
+
+<header>
   <h1>📊 ADMIN YEKSINA VOYAGE</h1>
+</header>
 
-  <h2>📈 Statistiques</h2>
-  <div id="stats"></div>
+<!-- STATS -->
+<div class="stats" id="stats"></div>
 
-  <h2>👥 Réservations</h2>
-  <div id="reservations"></div>
+<!-- FILTER -->
+<div class="filters">
+  <button onclick="loadAll()">Tous</button>
+  <button onclick="loadPayes()">Payés</button>
+  <button onclick="loadNonPayes()">Non Payés</button>
+</div>
 
-  <script>
-    /* STATS */
-    fetch("/admin/stats")
-      .then(res => res.json())
-      .then(s => {
-        document.getElementById("stats").innerHTML = `
-          <p>Total clients: ${s.totalClients}</p>
-          <p>Total places réservées: ${s.totalPlaces}</p>
-          <p>Revenus: ${s.totalRevenue} FCFA</p>
-          <p>Dakar: ${s.parTrajet.Dakar} places</p>
-          <p>Touba: ${s.parTrajet.Touba} places</p>
-          <p>Kaolack: ${s.parTrajet.Kaolack} places</p>
-        `;
-      });
+<!-- LIST -->
+<div class="container" id="list"></div>
 
-    /* RESERVATIONS */
-    fetch("/admin/reservations")
-      .then(res => res.json())
-      .then(data => {
-        const box = document.getElementById("reservations");
+<script>
 
-        if (data.length === 0) {
-          box.innerHTML = "<p>Aucune réservation</p>";
-          return;
-        }
+/* ===== STATS ===== */
+fetch("/admin/stats")
+.then(r => r.json())
+.then(s => {
+  document.getElementById("stats").innerHTML = `
+    <div class="card"><h3>${s.totalClients}</h3><p>Clients</p></div>
+    <div class="card"><h3>${s.totalPlaces}</h3><p>Places</p></div>
+    <div class="card"><h3>${s.totalRevenue} FCFA</h3><p>Revenus</p></div>
+    <div class="card"><h3>${s.parTrajet.Dakar}</h3><p>Dakar</p></div>
+    <div class="card"><h3>${s.parTrajet.Touba}</h3><p>Touba</p></div>
+    <div class="card"><h3>${s.parTrajet.Kaolack}</h3><p>Kaolack</p></div>
+  `;
+});
 
-        data.forEach(r => {
-          box.innerHTML += `
-            <div style="border:1px solid #000; margin:10px; padding:10px;">
-              <p><b>Nom:</b> ${r.nom}</p>
-              <p><b>Téléphone:</b> ${r.telephone}</p>
-              <p><b>Trajet:</b> ${r.trajet}</p>
-              <p><b>Date:</b> ${r.dateVoyage}</p>
-              <p><b>Places:</b> ${r.places}</p>
-              <p><b>Prix total:</b> ${r.prix * r.places} FCFA</p>
-              <p><b>Siège:</b> ${r.siege}</p>
-              <p><b>Code ticket:</b> ${r.codeTicket}</p>
-            </div>
-          `;
-        });
-      });
-  </script>
+/* ===== LOAD ALL ===== */
+function loadAll(){
+  fetch("/admin/reservations")
+  .then(r => r.json())
+  .then(show);
+}
+
+/* ===== PAYES ===== */
+function loadPayes(){
+  fetch("/admin/reservations/payees")
+  .then(r => r.json())
+  .then(show);
+}
+
+/* ===== NON PAYES ===== */
+function loadNonPayes(){
+  fetch("/admin/reservations")
+  .then(r => r.json())
+  .then(data => show(data.filter(r => r.paiement !== "PAYE")));
+}
+
+/* ===== SHOW ===== */
+function show(data){
+  const box = document.getElementById("list");
+  box.innerHTML = "";
+
+  data.forEach(r => {
+    box.innerHTML += `
+      <div class="reservation ${r.paiement === "PAYE" ? "payee" : "nonpayee"}">
+        <h3>${r.nom}</h3>
+        <p>📞 ${r.telephone}</p>
+        <p>🚍 ${r.trajet} - ${r.dateVoyage}</p>
+        <p>🎫 Places: ${r.places}</p>
+        <p>💰 Prix: ${r.prix * r.places} FCFA</p>
+        <p>🪑 Siège: ${r.siege}</p>
+        <p>🔖 Ticket: ${r.codeTicket}</p>
+        <small>Status: ${r.paiement}</small>
+      </div>
+    `;
+  });
+}
+
+/* init */
+loadAll();
+
+</script>
+
 </body>
 </html>
