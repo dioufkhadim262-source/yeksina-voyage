@@ -1,4 +1,4 @@
-const express    = require("express");   
+const express    = require("express");    
 const cors       = require("cors");
 const mongoose   = require("mongoose");
 const crypto     = require("crypto");
@@ -49,6 +49,7 @@ const Reservation = mongoose.model("Reservation", reservationSchema);
 /* ─────────────────────────────────────────
    HELPERS
 ───────────────────────────────────────── */
+
 function normalizeTel(v){
   return String(v).replace(/\D/g,"");
 }
@@ -66,7 +67,7 @@ function isNom(v){
 
 function getPrix(trajet){
   return {
-    Dakar:3300,
+    Dakar: 3300,
     Touba: 5000,
     Kaolack: 6600
   }[trajet] || 5000;
@@ -77,44 +78,89 @@ function genererCodeTicket(){
 }
 
 /* ─────────────────────────────────────────
-   🔥 ADMIN ROUTES AJOUTÉES
+   🔐 AUTH ADMIN
+───────────────────────────────────────── */
+
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "yeksina2026";
+
+function adminAuth(req, res, next){
+
+  const auth = req.headers.authorization;
+
+  if(!auth){
+    res.setHeader("WWW-Authenticate", "Basic realm='Admin'");
+    return res.status(401).send("Accès refusé");
+  }
+
+  const base64 = auth.split(" ")[1];
+  const decoded = Buffer.from(base64, "base64").toString();
+
+  const [user, pass] = decoded.split(":");
+
+  if(user === ADMIN_USER && pass === ADMIN_PASS){
+    next();
+  }else{
+    return res.status(401).send("Identifiants invalides");
+  }
+}
+
+/* ─────────────────────────────────────────
+   ADMIN ROUTES
 ───────────────────────────────────────── */
 
 /* PAGE ADMIN */
-app.get("/admin", (req, res) => {
+app.get("/admin", adminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-/* TOUTES LES RESERVATIONS */
-app.get("/admin/reservations", async (req, res) => {
+/* TOUTES RESERVATIONS */
+app.get("/admin/reservations", adminAuth, async (req, res) => {
   try {
-    const data = await Reservation.find().sort({ date: -1 });
+
+    const data = await Reservation.find({
+      paiement: "PAYE"
+    }).sort({ date: -1 });
+
     res.json(data);
+
   } catch (err) {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-/* PAYEES SEULEMENT */
-app.get("/admin/reservations/payees", async (req, res) => {
+/* PAYEES */
+app.get("/admin/reservations/payees", adminAuth, async (req, res) => {
   try {
-    const data = await Reservation.find({ paiement: "PAYE" }).sort({ date: -1 });
+
+    const data = await Reservation.find({
+      paiement: "PAYE"
+    }).sort({ date: -1 });
+
     res.json(data);
+
   } catch (err) {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-/* STATISTIQUES ADMIN */
-app.get("/admin/stats", async (req, res) => {
+/* STATS */
+app.get("/admin/stats", adminAuth, async (req, res) => {
   try {
-    const reservations = await Reservation.find();
+
+    const reservations = await Reservation.find({
+      paiement: "PAYE"
+    });
 
     let stats = {
       totalClients: reservations.length,
       totalPlaces: 0,
       totalRevenue: 0,
-      parTrajet: { Dakar: 0, Touba: 0, Kaolack: 0 }
+      parTrajet: {
+        Dakar: 0,
+        Touba: 0,
+        Kaolack: 0
+      }
     };
 
     reservations.forEach(r => {
@@ -124,20 +170,23 @@ app.get("/admin/stats", async (req, res) => {
     });
 
     res.json(stats);
+
   } catch (err) {
     res.status(500).json({ error: "Erreur stats" });
   }
 });
 
 /* VALIDATION PAIEMENT */
-app.patch("/admin/valider/:id", async (req, res) => {
+app.patch("/admin/valider/:id", adminAuth, async (req, res) => {
   try {
+
     await Reservation.findByIdAndUpdate(req.params.id, {
       paiement: "PAYE",
       statut: "PAYE"
     });
 
     res.json({ success: true });
+
   } catch (err) {
     res.status(500).json({ error: "Erreur validation" });
   }
@@ -146,8 +195,10 @@ app.patch("/admin/valider/:id", async (req, res) => {
 /* ─────────────────────────────────────────
    EXPIRATION AUTO (15 MIN)
 ───────────────────────────────────────── */
+
 setInterval(async () => {
   try {
+
     const now = new Date();
 
     await Reservation.deleteMany({
@@ -161,24 +212,36 @@ setInterval(async () => {
 }, 60 * 1000);
 
 /* ─────────────────────────────────────────
-   RESERVATION
+   RESERVATION + WAVE FIX
 ───────────────────────────────────────── */
+
 app.post("/reserver", async (req,res)=>{
+
   try{
+
     let { nom, telephone, trajet, places, date } = req.body;
 
     if(!nom || !telephone || !trajet || !places || !date){
-      return res.json({success:false,message:"Champs manquants"});
+      return res.json({
+        success:false,
+        message:"Champs manquants"
+      });
     }
 
     if(!isNom(nom) || !isTel(telephone)){
-      return res.json({success:false,message:"Données invalides"});
+      return res.json({
+        success:false,
+        message:"Données invalides"
+      });
     }
 
     const nbPlaces = parseInt(places);
 
     if(nbPlaces < 1){
-      return res.json({success:false,message:"Nombre de places invalide"});
+      return res.json({
+        success:false,
+        message:"Nombre de places invalide"
+      });
     }
 
     const prix = getPrix(trajet);
@@ -186,7 +249,7 @@ app.post("/reserver", async (req,res)=>{
 
     const lockExpire = new Date(Date.now() + 15 * 60 * 1000);
 
-    const reservation = new Reservation({
+    await new Reservation({
       nom: nom.trim(),
       telephone: normalizeTel(telephone),
       trajet,
@@ -196,12 +259,12 @@ app.post("/reserver", async (req,res)=>{
       codeTicket,
       paiement: "NON_PAYE",
       lockExpire
-    });
+    }).save();
 
-    await reservation.save();
+    const amount = prix * nbPlaces;
 
     const paymentUrl =
-      `https://pay.wave.com/m/M_sn_O2mWfULdH641/c/sn/?amount=${prix * nbPlaces}`;
+      `https://pay.wave.com/m/M_sn_O2mWfULdH641/c/sn/?amount=${encodeURIComponent(amount)}`;
 
     return res.json({
       success:true,
@@ -211,14 +274,22 @@ app.post("/reserver", async (req,res)=>{
     });
 
   }catch(err){
-    return res.json({success:false,message:"Erreur serveur"});
+
+    console.error(err);
+
+    return res.json({
+      success:false,
+      message:"Erreur serveur"
+    });
   }
 });
 
 /* ─────────────────────────────────────────
-   START
+   START SERVER
 ───────────────────────────────────────── */
+
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, ()=>{
   console.log("🚀 Serveur OK :", PORT);
 });
