@@ -49,7 +49,6 @@ const Reservation = mongoose.model("Reservation", reservationSchema);
 /* ─────────────────────────────────────────
    HELPERS
 ───────────────────────────────────────── */
-
 function normalizeTel(v){
   return String(v).replace(/\D/g,"");
 }
@@ -78,14 +77,12 @@ function genererCodeTicket(){
 }
 
 /* ─────────────────────────────────────────
-   🔐 AUTH ADMIN
+   ADMIN AUTH
 ───────────────────────────────────────── */
-
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "yeksina2026";
 
 function adminAuth(req, res, next){
-
   const auth = req.headers.authorization;
 
   if(!auth){
@@ -93,74 +90,55 @@ function adminAuth(req, res, next){
     return res.status(401).send("Accès refusé");
   }
 
-  const base64 = auth.split(" ")[1];
-  const decoded = Buffer.from(base64, "base64").toString();
-
+  const decoded = Buffer.from(auth.split(" ")[1], "base64").toString();
   const [user, pass] = decoded.split(":");
 
   if(user === ADMIN_USER && pass === ADMIN_PASS){
     next();
-  }else{
+  } else {
     return res.status(401).send("Identifiants invalides");
   }
 }
 
 /* ─────────────────────────────────────────
-   ADMIN ROUTES
+   ADMIN ROUTES (CORRIGÉES)
 ───────────────────────────────────────── */
 
-/* PAGE ADMIN */
+// PAGE ADMIN
 app.get("/admin", adminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-/* TOUTES RESERVATIONS */
+// TOUTES LES RESERVATIONS (IMPORTANT FIX)
 app.get("/admin/reservations", adminAuth, async (req, res) => {
   try {
-
-    const data = await Reservation.find({
-      paiement: "PAYE"
-    }).sort({ date: -1 });
-
+    const data = await Reservation.find().sort({ date: -1 });
     res.json(data);
-
   } catch (err) {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-/* PAYEES */
+// PAYEES
 app.get("/admin/reservations/payees", adminAuth, async (req, res) => {
   try {
-
-    const data = await Reservation.find({
-      paiement: "PAYE"
-    }).sort({ date: -1 });
-
+    const data = await Reservation.find({ paiement: "PAYE" }).sort({ date: -1 });
     res.json(data);
-
   } catch (err) {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
-/* STATS */
+// STATS (TOUTES RESERVATIONS)
 app.get("/admin/stats", adminAuth, async (req, res) => {
   try {
-
-    const reservations = await Reservation.find({
-      paiement: "PAYE"
-    });
+    const reservations = await Reservation.find();
 
     let stats = {
       totalClients: reservations.length,
       totalPlaces: 0,
       totalRevenue: 0,
-      parTrajet: {
-        Dakar: 0,
-        Touba: 0,
-        Kaolack: 0
-      }
+      parTrajet: { Dakar: 0, Touba: 0, Kaolack: 0 }
     };
 
     reservations.forEach(r => {
@@ -170,23 +148,20 @@ app.get("/admin/stats", adminAuth, async (req, res) => {
     });
 
     res.json(stats);
-
   } catch (err) {
     res.status(500).json({ error: "Erreur stats" });
   }
 });
 
-/* VALIDATION PAIEMENT */
+// VALIDATION PAIEMENT
 app.patch("/admin/valider/:id", adminAuth, async (req, res) => {
   try {
-
     await Reservation.findByIdAndUpdate(req.params.id, {
       paiement: "PAYE",
       statut: "PAYE"
     });
 
     res.json({ success: true });
-
   } catch (err) {
     res.status(500).json({ error: "Erreur validation" });
   }
@@ -195,10 +170,8 @@ app.patch("/admin/valider/:id", adminAuth, async (req, res) => {
 /* ─────────────────────────────────────────
    EXPIRATION AUTO (15 MIN)
 ───────────────────────────────────────── */
-
 setInterval(async () => {
   try {
-
     const now = new Date();
 
     await Reservation.deleteMany({
@@ -214,39 +187,26 @@ setInterval(async () => {
 /* ─────────────────────────────────────────
    RESERVATION + WAVE FIX
 ───────────────────────────────────────── */
-
 app.post("/reserver", async (req,res)=>{
-
   try{
-
     let { nom, telephone, trajet, places, date } = req.body;
 
     if(!nom || !telephone || !trajet || !places || !date){
-      return res.json({
-        success:false,
-        message:"Champs manquants"
-      });
+      return res.json({ success:false, message:"Champs manquants" });
     }
 
     if(!isNom(nom) || !isTel(telephone)){
-      return res.json({
-        success:false,
-        message:"Données invalides"
-      });
+      return res.json({ success:false, message:"Données invalides" });
     }
 
     const nbPlaces = parseInt(places);
 
     if(nbPlaces < 1){
-      return res.json({
-        success:false,
-        message:"Nombre de places invalide"
-      });
+      return res.json({ success:false, message:"Nombre de places invalide" });
     }
 
     const prix = getPrix(trajet);
     const codeTicket = genererCodeTicket();
-
     const lockExpire = new Date(Date.now() + 15 * 60 * 1000);
 
     await new Reservation({
@@ -274,22 +234,16 @@ app.post("/reserver", async (req,res)=>{
     });
 
   }catch(err){
-
     console.error(err);
-
-    return res.json({
-      success:false,
-      message:"Erreur serveur"
-    });
+    return res.json({ success:false, message:"Erreur serveur" });
   }
 });
 
 /* ─────────────────────────────────────────
    START SERVER
 ───────────────────────────────────────── */
-
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, ()=>{
+app.listen(PORT, ()=> {
   console.log("🚀 Serveur OK :", PORT);
 });
