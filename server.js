@@ -85,21 +85,25 @@ const ADMIN_PASS = "yeksina2026";
 function adminAuth(req, res, next){
   const auth = req.headers.authorization;
 
+  // Force la demande de mot de passe + empêche cache navigateur
+  res.setHeader("WWW-Authenticate", "Basic realm='Admin', charset='UTF-8'");
+  res.setHeader("Cache-Control", "no-store");
+
   if(!auth){
-    res.setHeader("WWW-Authenticate", "Basic realm='Admin'");
     return res.status(401).send("Accès refusé");
   }
 
-  const decoded = Buffer.from(auth.split(" ")[1], "base64").toString();
+  const base64 = auth.split(" ")[1];
+  const decoded = Buffer.from(base64, "base64").toString();
+
   const [user, pass] = decoded.split(":");
 
   if(user === ADMIN_USER && pass === ADMIN_PASS){
-    next();
-  } else {
-    return res.status(401).send("Identifiants invalides");
+    return next();
   }
-}
 
+  return res.status(401).send("Identifiants invalides");
+}
 /* ─────────────────────────────────────────
    ADMIN ROUTES (CORRIGÉES)
 ───────────────────────────────────────── */
