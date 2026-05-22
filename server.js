@@ -85,7 +85,6 @@ const ADMIN_PASS = "yeksina2026";
 function adminAuth(req, res, next){
   const auth = req.headers.authorization;
 
-  // Force la demande de mot de passe + empêche cache navigateur
   res.setHeader("WWW-Authenticate", "Basic realm='Admin', charset='UTF-8'");
   res.setHeader("Cache-Control", "no-store");
 
@@ -93,9 +92,7 @@ function adminAuth(req, res, next){
     return res.status(401).send("Accès refusé");
   }
 
-  const base64 = auth.split(" ")[1];
-  const decoded = Buffer.from(base64, "base64").toString();
-
+  const decoded = Buffer.from(auth.split(" ")[1], "base64").toString();
   const [user, pass] = decoded.split(":");
 
   if(user === ADMIN_USER && pass === ADMIN_PASS){
@@ -104,8 +101,9 @@ function adminAuth(req, res, next){
 
   return res.status(401).send("Identifiants invalides");
 }
+
 /* ─────────────────────────────────────────
-   ADMIN ROUTES (CORRIGÉES)
+   ADMIN ROUTES
 ───────────────────────────────────────── */
 
 // PAGE ADMIN
@@ -113,7 +111,7 @@ app.get("/admin", adminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-// TOUTES LES RESERVATIONS (IMPORTANT FIX)
+// TOUS LES CLIENTS (IMPORTANT)
 app.get("/admin/reservations", adminAuth, async (req, res) => {
   try {
     const data = await Reservation.find().sort({ date: -1 });
@@ -133,7 +131,7 @@ app.get("/admin/reservations/payees", adminAuth, async (req, res) => {
   }
 });
 
-// STATS (TOUTES RESERVATIONS)
+// STATS (TOUS)
 app.get("/admin/stats", adminAuth, async (req, res) => {
   try {
     const reservations = await Reservation.find();
@@ -157,31 +155,47 @@ app.get("/admin/stats", adminAuth, async (req, res) => {
   }
 });
 
-// VALIDATION PAIEMENT
+// VALIDATION PAIEMENT (FIXÉ)
 app.patch("/admin/valider/:id", adminAuth, async (req, res) => {
   try {
-    await Reservation.findByIdAndUpdate(req.params.id, {
-      paiement: "PAYE",
-      statut: "PAYE"
-    });
+    const updated = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          paiement: "PAYE",
+          statut: "PAYE"
+        }
+      },
+      { new: true }
+    );
 
-    res.json({ success: true });
+    if (!updated) {
+      return res.status(404).json({ error: "Reservation introuvable" });
+    }
+
+    res.json({ success: true, data: updated });
+
   } catch (err) {
     res.status(500).json({ error: "Erreur validation" });
   }
 });
 
 /* ─────────────────────────────────────────
-   EXPIRATION AUTO (15 MIN)
+   EXPIRATION AUTO (SANS SUPPRESSION)
 ───────────────────────────────────────── */
 setInterval(async () => {
   try {
     const now = new Date();
 
-    await Reservation.deleteMany({
-      paiement: "NON_PAYE",
-      lockExpire: { $lt: now }
-    });
+    await Reservation.updateMany(
+      {
+        paiement: "NON_PAYE",
+        lockExpire: { $lt: now }
+      },
+      {
+        $set: { statut: "EXPIRE" }
+      }
+    );
 
   } catch (err) {
     console.error("Erreur expiration:", err.message);
@@ -238,7 +252,6 @@ app.post("/reserver", async (req,res)=>{
     });
 
   }catch(err){
-    console.error(err);
     return res.json({ success:false, message:"Erreur serveur" });
   }
 });
